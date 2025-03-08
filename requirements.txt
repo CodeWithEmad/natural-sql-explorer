@@ -4,3 +4,5 @@ langchain-community
 mysql-connector-python
 openai
 plotly
+mcp[cli]
+python-dotenv
