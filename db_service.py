@@ -11,13 +11,14 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+
 @dataclass
 class DBConnection:
-    host: str = os.getenv('MYSQL_HOST', 'localhost')
-    port: int = int(os.getenv('MYSQL_PORT', '3306'))
-    user: str = os.getenv('MYSQL_USER', 'user')
-    password: str = os.getenv('MYSQL_PASSWORD', 'password')
-    database: str = os.getenv('MYSQL_DATABASE', 'test_db')
+    host: str = os.getenv("MYSQL_HOST", "localhost")
+    port: int = int(os.getenv("MYSQL_PORT", "3306"))
+    user: str = os.getenv("MYSQL_USER", "user")
+    password: str = os.getenv("MYSQL_PASSWORD", "password")
+    database: str = os.getenv("MYSQL_DATABASE", "test_db")
     connection: Optional[MySQLConnection] = None
 
     def connect(self) -> bool:
@@ -28,7 +29,7 @@ class DBConnection:
                 port=self.port,
                 user=self.user,
                 password=self.password,
-                database=self.database
+                database=self.database,
             )
             return True
         except Error as e:
@@ -38,6 +39,7 @@ class DBConnection:
     def is_connected(self) -> bool:
         """Check if database is connected"""
         return self.connection is not None and self.connection.is_connected()
+
 
 class DatabaseService:
     def __init__(self):
@@ -71,7 +73,9 @@ class DatabaseService:
         cursor.close()
         return structure
 
-    def get_sample_data(self, table_name: str, limit: int = 5) -> Tuple[List[str], List[Tuple]]:
+    def get_sample_data(
+        self, table_name: str, limit: int = 5
+    ) -> Tuple[List[str], List[Tuple]]:
         """Get sample data from a specific table"""
         if not self._connection or not self._connection.is_connected():
             raise ValueError("Database not connected")
@@ -113,17 +117,23 @@ class DatabaseService:
             return False
 
         numeric_cols = df.select_dtypes(include=["int64", "float64"]).columns
-        categorical_cols = df.select_dtypes(include=["object", "category", "bool"]).columns
+        categorical_cols = df.select_dtypes(
+            include=["object", "category", "bool"]
+        ).columns
         temporal_cols = df.select_dtypes(include=["datetime64"]).columns
 
         return len(numeric_cols) > 0 and (
             len(categorical_cols) > 0 or len(temporal_cols) > 0
         )
 
-    def suggest_visualization(self, df: pd.DataFrame, query: str) -> Optional[Dict[str, Any]]:
+    def suggest_visualization(
+        self, df: pd.DataFrame, query: str
+    ) -> Optional[Dict[str, Any]]:
         """Suggest appropriate visualization based on data and query"""
         numeric_cols = df.select_dtypes(include=["int64", "float64"]).columns
-        categorical_cols = df.select_dtypes(include=["object", "category", "bool"]).columns
+        categorical_cols = df.select_dtypes(
+            include=["object", "category", "bool"]
+        ).columns
         temporal_cols = df.select_dtypes(include=["datetime64"]).columns
 
         # Convert date strings to datetime if possible
@@ -181,6 +191,7 @@ class DatabaseService:
             return {"fig": fig, "type": "scatter"}
 
         return None
+
 
 # Create a global instance
 db = DatabaseService()

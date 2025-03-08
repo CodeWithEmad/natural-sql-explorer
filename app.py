@@ -7,7 +7,9 @@ import os
 # --- LangChain LLM Query Generation ---
 
 
-def generate_sql_query(openai_api_key: str, schema: dict, sample_data: dict, user_request: str) -> str:
+def generate_sql_query(
+    openai_api_key: str, schema: dict, sample_data: dict, user_request: str
+) -> str:
     """Generate SQL query using OpenAI LLM"""
     llm = OpenAI(api_key=openai_api_key, temperature=0)
     prompt_template = PromptTemplate(
@@ -43,7 +45,9 @@ if "messages" not in st.session_state:
 # Navbar for OpenAI API key
 with st.sidebar:
     st.header("Settings")
-    openai_api_key = st.text_input("OpenAI API Key", type="password", value=os.getenv('OPENAI_API_KEY', ''))
+    openai_api_key = st.text_input(
+        "OpenAI API Key", type="password", value=os.getenv("OPENAI_API_KEY", "")
+    )
 
 # Automatically attempt connection using environment variables
 if db.connect():
