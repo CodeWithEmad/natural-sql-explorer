@@ -1,0 +1,22 @@
+services:
+  mysql:
+    image: mysql:8.4.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword    # Root password for MySQL
+      MYSQL_DATABASE: test_db             # Default database to create
+      MYSQL_USER: user                    # Non-root user
+      MYSQL_PASSWORD: password            # Password for non-root user
+    ports:
+      - "3306:3306"                       # Expose MySQL port to host
+    volumes:
+      - mysql_data:/var/lib/mysql         # Persistent storage for MySQL data
+    restart: unless-stopped             # Restart policy
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_data:                           # Named volume for data persistence
