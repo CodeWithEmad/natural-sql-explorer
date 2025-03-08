@@ -1,6 +1,7 @@
 from mcp.server.fastmcp import FastMCP
 from typing import Dict, Any, List, Tuple
 from db_service import db
+import pandas as pd
 
 # Create an MCP server
 mcp = FastMCP("SQL Data Server")
@@ -11,13 +12,13 @@ if not db.connect():
     exit(1)
 print("Successfully connected to database")
 
-@mcp.resource("mcp://schema")
+@mcp.tool()
 def get_database_schema() -> Dict[str, List[Tuple[str, str]]]:
     """STEP 1: Get the database schema to understand available tables and their columns.
     Returns a dictionary where:
     - Keys are table names
     - Values are lists of (column_name, column_type) tuples
-    
+
     Use this first to understand the database structure before creating queries.
     """
     return db.get_table_structure()
@@ -51,3 +52,26 @@ def execute_query(query: str) -> List[Dict[str, Any]]:
     Returns a list of dictionaries where each dictionary represents a row in the result.
     """
     return db.execute_query_as_dict(query)
+
+@mcp.tool()
+def visualize_data(query: str) -> str:
+    """STEP 4 (Optional): Create a visualization from your SQL query results.
+    This tool will analyze your data and create an appropriate chart.
+    
+    Args:
+        query: A SQL query that returns data to visualize (must be a SELECT query)
+    
+    Returns:
+        An HTML string containing the interactive Plotly chart.
+        You can display this in a web browser or in supported chat interfaces.
+    """
+    # Execute query and convert to DataFrame
+    results = db.execute_query_as_dict(query)
+    df = pd.DataFrame(results)
+    
+    # Get visualization suggestion
+    suggestion = db.suggest_visualization(df, query)
+    if suggestion:
+        return suggestion['fig'].to_html(full_html=False, include_plotlyjs='cdn')
+    else:
+        return "Could not generate a visualization for this data. Try a different query that includes numeric and categorical/temporal columns."
