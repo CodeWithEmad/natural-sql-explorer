@@ -11,22 +11,43 @@ if not db.connect():
     exit(1)
 print("Successfully connected to database")
 
-@mcp.tool()
-def execute_query(query: str) -> List[Dict[str, Any]]:
-    """Execute a SQL query and return the results as a list of dictionaries"""
-    return db.execute_query_as_dict(query)
-
 @mcp.resource("mcp://schema")
 def get_database_schema() -> Dict[str, List[Tuple[str, str]]]:
-    """Get the database schema including all tables and their columns"""
+    """STEP 1: Get the database schema to understand available tables and their columns.
+    Returns a dictionary where:
+    - Keys are table names
+    - Values are lists of (column_name, column_type) tuples
+    
+    Use this first to understand the database structure before creating queries.
+    """
     return db.get_table_structure()
 
 @mcp.tool()
 def get_table_sample(table: str, limit: int = 5) -> List[Dict[str, Any]]:
-    """Get sample data from a specific table with optional limit"""
+    """STEP 2 (Optional): Get sample data from a specific table to understand its contents.
+    This helps in understanding the actual data before writing queries.
+    
+    Args:
+        table: Name of the table to sample
+        limit: Number of rows to return (default: 5)
+    
+    Returns a list of dictionaries where each dictionary represents a row.
+    """
     columns, data = db.get_sample_data(table, limit)
     return [dict(zip(columns, row)) for row in data]
 
-if __name__ == "__main__":
-    # For development mode
-    mcp.run_dev()
+@mcp.tool()
+def execute_query(query: str) -> List[Dict[str, Any]]:
+    """STEP 3: Execute a SQL query after understanding the schema and data.
+    
+    IMPORTANT: Before using this tool:
+    1. First call get_database_schema() to understand available tables and columns
+    2. Optionally use get_table_sample() to see example data
+    3. Then construct and execute your SQL query
+    
+    Args:
+        query: A valid SQL query string (SELECT, INSERT, UPDATE, DELETE)
+    
+    Returns a list of dictionaries where each dictionary represents a row in the result.
+    """
+    return db.execute_query_as_dict(query)
